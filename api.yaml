@@ -1,0 +1,256 @@
+swagger: "2.0"
+info: 
+  title: SimpleAPI
+  version: 1.0.0
+  contact:
+    email: mohammadicecream@yahoo.com
+  servers:
+    -url: "http://localhost:5000"
+    description: Local server
+schemes: [http,https]
+paths:
+  /api/v1/auth/register:
+    post:
+      summary: Register new user
+      description: Register new user
+      tags: ["Authorization"]
+      parameters:
+        - in: body
+          name: user
+          description: "User you want to add. <br> Note : registerAccessKey is REGISTER_ACCESS_KEY that you set in .env file"
+          schema:
+            type: object
+            required:
+              - email
+              - password
+              - registerAccessKey
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+              registerAccessKey:
+                type: string
+      responses:
+        201:
+          description: Successful operation
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+  /api/v1/auth/registerConfirm/{emailValidationKey}:
+    post:
+      summary: Verify Account You Registered
+      description: Verify Account You Registered
+      tags: ["Authorization"]
+      parameters:
+        - in: path
+          name: emailValidationKey
+          description: "User email you want to verify. <br> Note : its in db document it called emailValidationKey <br> Also you can implant the send email logic for the real api in ./services/auth.ts Line:27"
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful operation
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+  /api/v1/auth/validationResend/{email}:
+    post:
+      summary: Resend Verify Link
+      description: Resend Verify Link
+      tags: ["Authorization"]
+      parameters:
+        - in: path
+          name: email
+          description: User email you want to send verify link again.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful operation
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+  /api/v1/auth/login:
+    post:
+      summary: Login And Get Jwt Access Token
+      description: Login And Get Jwt Access Token
+      tags: ["Authorization"]
+      parameters:
+        - in: body
+          name: user
+          description: "User info you want login with. <br> Note: in successful response it gives you accessToken + saves http cookie for the refresh token route (expires in 30 days) <br>You should use accessToken in private routes with ('Authorization' : accessToken) in header. "
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        200:
+          description: Successful operation
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+  /api/v1/auth/refreshToken:
+    get:
+      summary: Refresh The Access Token And Return New Access Token
+      description: Refresh The Access Token And Return New Access Token
+      tags: ["Authorization"]
+      parameters:
+        - in: cookie
+          name: Authorization
+          description: "Http Cookie That Will Get When You Login. <br> Note : Just Login and leave this empty"
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful operation
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+  /api/v1/auth/logout:
+    delete:
+      summary: Logout and delete refreshToken
+      description: Logout and delete refreshToken
+      tags: ["Authorization"]
+      parameters:
+        - in: cookie
+          name: Authorization
+          description: "Http Cookie That Will Get When You Login. <br> Note : Just Login and leave this empty"
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful operation
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+  /api/v1/license/create/{type}/{number}:
+    post:
+      summary: Create License Key
+      description: Create License Key
+      tags: ["License"]
+      parameters:
+        - name: type
+          in: path
+          description: "Type of License. <br>Note :Types are sevenDay - oneMonth - threeMonth - sixMonth - oneYear."
+          required: true
+          schema:
+            type: string
+        - name: number
+          in: path
+          description: How many licenses you want to add.
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Authorization
+          description: Access token from login.
+          schema:
+            type: string
+          required: true
+      responses:
+        201:
+          description: Successful operation
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+  /api/v1/license/show/{type}?page=number&limit=number:
+    post:
+      summary: Show License Keys
+      description: Show License Keys
+      tags: ["License"]
+      parameters:
+        - name: type
+          in: path
+          description: "Type of License. <br>Note :Types are sevenDay - oneMonth - threeMonth - sixMonth - oneYear."
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: page
+          type: integer
+          description: the page you want.
+        - in: query
+          name: limit
+          type: integer
+          description: limit of items on page.
+        - in: header
+          name: Authorization
+          description: Access token from login.
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Successful operation
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+  /api/v1/license/activate:
+    post:
+      summary: Activate Bought License
+      description: Activate Bought License
+      tags: ["License"]
+      parameters:
+        - in: body
+          name: license
+          description: License Key You Want To Active + Windows Id You Get From Your App.
+          schema:
+            type: object
+            required:
+              - licenseKey
+              - windowsId
+            properties:
+              licenseKey:
+                type: string
+              windowsId:
+                type: string
+      responses:
+        201:
+          description: Successful operation
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
+  /api/v1/license/status:
+    get:
+      summary: See License Status And Days Remaining
+      description: See License Status And Days Remaining
+      tags: ["License"]
+      parameters:
+        - in: body
+          name: license
+          description: "License Key You Want To Active + Windows Id You Get From Your App. <br>Note : In Successful Response It Returns 'message : License is valid' and 'days' remaining"
+          schema:
+            type: object
+            required:
+              - licenseKey
+              - windowsId
+            properties:
+              licenseKey:
+                type: string
+              windowsId:
+                type: string
+      responses:
+        200:
+          description: Successful operation
+        400:
+          description: Bad Request
+        500:
+          description: Internal Server Error
