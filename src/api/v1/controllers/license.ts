@@ -81,5 +81,3 @@ export const licenseStatus = async (
     next(err);
   }
 };
-
-// license status moshkel dare | bayad licensekey ro biaram to req.body | bayad check kardane windows id ro ham ezafe konam
