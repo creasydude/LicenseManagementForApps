@@ -8,7 +8,8 @@
 1. Install Dependencies `$ npm install`
 2. Edit .env file
 3.  Run Commands
-###Commands
+
+### Commands
 
 `$ npm run dev `
 
